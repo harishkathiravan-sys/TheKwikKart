@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import serverless from 'serverless-http';
 import connectDB from './server/config/db.js';
 import { notFound, errorHandler } from './server/middleware/errorHandler.js';
 
@@ -36,7 +37,7 @@ app.use('/api/admin', adminRoutes);
 
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, 'dist')));
-  app.get('/*splat', (req, res) =>
+  app.get('/*', (req, res) =>
     res.sendFile(path.resolve(__dirname, 'dist', 'index.html'))
   );
 }
@@ -45,6 +46,10 @@ app.use(notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+export default serverless(app);
